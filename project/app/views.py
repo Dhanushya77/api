@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse,JsonResponse
+from rest_framework.response import Response
 from .models import *
 from .serializers import *
 from rest_framework.parsers import JSONParser
@@ -40,17 +41,17 @@ def fun3(req):
 @csrf_exempt
 def fun4(req, d):
     try:
-        demo = student.objects.get(pk=d)
-    except student.DoesNotExist:
+        demo = Student.objects.get(pk=d)
+    except Student.DoesNotExist:
         return HttpResponse('invalid')
 
     if req.method == 'GET':
-        s = model_serializer(demo)
+        s = Model_serializer(demo)
         return JsonResponse(s.data)
 
     elif req.method == 'PUT':
         d = JSONParser().parse(req)
-        s = model_serializer(demo, data=d)
+        s = Model_serializer(demo, data=d)
 
         if s.is_valid():
             s.save()
@@ -66,12 +67,12 @@ def fun4(req, d):
 @api_view(['GET', 'POST'])
 def fun5(req):
     if req.method == 'GET':
-        d = student.objects.all()
-        s = model_serializer(d, many=True)
+        d = Student.objects.all()
+        s = Model_serializer(d, many=True)
         return Response(s.data)
 
     elif req.method == 'POST':
-        s = model_serializer(data=req.data)
+        s = Model_serializer(data=req.data)
         if s.is_valid():
             s.save()
             return JsonResponse(s.data, status=status.HTTP_201_CREATED)
@@ -82,16 +83,16 @@ def fun5(req):
 @api_view(['GET', 'PUT', 'DELETE'])
 def fun6(req, d):
     try:
-        demo = student.objects.get(pk=d)
-    except student.DoesNotExist:
+        demo = Student.objects.get(pk=d)
+    except Student.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if req.method == 'GET':
-        s = model_serializer(demo)
+        s = Model_serializer(demo)
         return Response(s.data)
 
     elif req.method == 'PUT':
-        s = model_serializer(demo, data=req.data)
+        s = Model_serializer(demo, data=req.data)
         if s.is_valid():
             s.save()
             return Response(s.data)
@@ -105,12 +106,12 @@ def fun6(req, d):
 
 class fun7(APIView):
     def get(self, req):
-        demo = student.objects.all()
-        s = model_serializer(demo, many=True)
+        demo = Student.objects.all()
+        s = Model_serializer(demo, many=True)
         return Response(s.data)
 
     def post(self, req):
-        s = model_serializer(data=req.data)
+        s = Model_serializer(data=req.data)
         if s.is_valid():
             s.save()
             return JsonResponse(s.data, status=status.HTTP_201_CREATED)
@@ -119,36 +120,36 @@ class fun7(APIView):
 class fun8(APIView):
     def get(self, req, d):
         try:
-            demo = student.objects.get(pk=d)
-            s = model_serializer(demo)
+            demo = Student.objects.get(pk=d)
+            s = Model_serializer(demo)
             return Response(s.data)
-        except student.DoesNotExist:
+        except Student.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, req, d):
         try:
-            demo = student.objects.get(pk=d)
-            s = model_serializer(demo, data=req.data)
+            demo = Student.objects.get(pk=d)
+            s = Model_serializer(demo, data=req.data)
             if s.is_valid():
                 s.save()
                 return Response(s.data)
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-        except student.DoesNotExist:
+        except Student.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, req, d):
         try:
-            demo = student.objects.get(pk=d)
+            demo = Student.objects.get(pk=d)
             demo.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except student.DoesNotExist:
+        except Student.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class genericapiview(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
-    serializer_class = model_serializer
-    queryset = student.objects.all()
+    serializer_class = Model_serializer
+    queryset = Student.objects.all()
 
     def get(self, req):
         return self.list(req)
@@ -158,8 +159,8 @@ class genericapiview(generics.GenericAPIView, mixins.ListModelMixin, mixins.Crea
 
 
 class update(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
-    serializer_class = model_serializer
-    queryset = student.objects.all()
+    serializer_class = Model_serializer
+    queryset = Student.objects.all()
     lookup_field = 'id'
 
     def get(self, req, id=None):
